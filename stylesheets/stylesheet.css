@@ -368,6 +368,21 @@ Full-Width Styles
   background: #212121;
 }
 
+.logo {
+  padding: 0px;
+  border: 0px;
+  margin: 0px 6px 0px 0px;
+  display: inline-block;
+  float: left;
+  width: 126px;
+  height: 126px;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  -o-box-shadow: none;
+  -ms-box-shadow: none;
+}
+
 
 
 /*******************************************************************************
