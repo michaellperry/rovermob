@@ -98,6 +98,8 @@
   <PropertyGroup>
     <PostBuildEvent>for %25%25f in (
 "$(SolutionDir)NuGet\Core\lib\portable-wpa81+win81\"
+"$(SolutionDir)NuGet\Core\lib\wpa81\"
+"$(SolutionDir)NuGet\Core\lib\win81\"
 ) do (
 xcopy /y $(TargetPath) "%25%25~f"
 xcopy /y $(TargetDir)$(TargetName).xml "%25%25~f"

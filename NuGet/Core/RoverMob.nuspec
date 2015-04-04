@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>RoverMob</id>
-    <version>0.1.1</version>
+    <version>0.1.4</version>
     <title>Rover Mobile Application Framework</title>
     <authors>Michael L Perry</authors>
     <owners>Michael L Perry</owners>
@@ -14,7 +14,25 @@
     <copyright>Copyright 2015</copyright>
     <tags>Mobile</tags>
     <dependencies>
-      <dependency id="Assisticant" version="[1.1.4.1,)"/>
+      <group targetFramework="portable-win81+wpa81">
+        <dependency id="Assisticant" version="[1.1.4.1,)" />
+        <dependency id="Microsoft.Bcl.Immutable" version="[1.0.34,)" />
+        <dependency id="Newtonsoft.Json" version="[6.0.8,)" />
+      </group>
+
+      <group targetFramework="win81">
+        <dependency id="Assisticant" version="[1.1.4.1,)" />
+        <dependency id="Microsoft.Bcl.Immutable" version="[1.0.34,)" />
+        <dependency id="Newtonsoft.Json" version="[6.0.8,)" />
+        <dependency id="WindowsAzure.Messaging.Managed" version="[0.1.7.9,)" />
+      </group>
+
+      <group targetFramework="wpa81">
+        <dependency id="Assisticant" version="[1.1.4.1,)" />
+        <dependency id="Microsoft.Bcl.Immutable" version="[1.0.34,)" />
+        <dependency id="Newtonsoft.Json" version="[6.0.8,)" />
+        <dependency id="WindowsAzure.Messaging.Managed" version="[0.1.7.9,)" />
+      </group>
     </dependencies>
   </metadata>
 </package>
