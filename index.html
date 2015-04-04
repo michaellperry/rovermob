@@ -65,6 +65,8 @@ public class ViewModelLocator : ViewModelLocatorBase
 }
 </pre>
 
+<p>I like to create one view model locator per target platform: one for Windows and one for Windows Phone. You may choose to do otherwise, and put the view model locator in the shared code project or a portable class library.</p>
+
 <p>Add an instance of this class to your App.xaml resource dictionary with the key &quot;Locator&quot;.</p>
 
 <pre>
@@ -77,6 +79,14 @@ public class ViewModelLocator : ViewModelLocatorBase
         &lt;/ResourceDictionary&gt;
     &lt;/Application.Resources&gt;
 &lt;/Application&gt;
+</pre>
+
+<p>Create a view model. Notice that it does not have a base class.</p>
+
+<pre>
+public class MainViewModel
+{
+}
 </pre>
 
 <p>Add a property for the main view model.</p>
@@ -99,6 +109,8 @@ public class ViewModelLocator : ViewModelLocatorBase
     DataContext="{Binding Main, Source={StaticResource Locator}}" &gt;
 &lt;/Page&gt;
 </pre>
+
+<p>At this point, it's good to add a simple getter-only property to the main view model. Inside the getter, return a hard-coded value. Then data bind this to a control on the view. This will help you verify that you've completed all the steps properly.</p>
 
 <h3>Create an Application</h3>
 
