@@ -9,5 +9,7 @@ namespace RoverMob.Messaging
     {
         Guid GetObjectId();
         void HandleMessage(Message message);
+        void HandleAllMessages(IEnumerable<Message> messages);
+        IEnumerable<IMessageHandler> Children { get; }
     }
 }

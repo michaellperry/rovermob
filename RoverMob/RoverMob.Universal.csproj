@@ -41,6 +41,7 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Application.cs" />
     <Compile Include="Crypto\DigestStream.cs" />
     <Compile Include="Crypto\GeneralDigest.cs" />
     <Compile Include="Crypto\IDigest.cs" />
