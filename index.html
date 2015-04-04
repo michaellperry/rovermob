@@ -45,7 +45,111 @@ Rover Mobile is message-based. Application state is stored as a history of parti
 ordered facts. Facts are exchanged via message. And messages can be sent and received
 in any order. Conflicts are detected, and can be presented to the user for resolution.</p>
 
-<h3>Learn more on Pluralsight</h3>
+<h3>Install Via NuGet</h3>
+
+<p>Create a Windows Universal App project.</p>
+
+<code>Install-Package RoverMob</code>
+
+<h3>Create a View Model Locator</h3>
+
+<p>If you prefer another pattern (for example ViewModel First), you may use that instead once
+you understand the Toolkit. However, for your first app with Rover, please use the View Model
+Locator pattern.</p>
+
+<p>Create a class called ViewModelLocator. Inherit from ViewModelLocatorBase (in Assisticant).</p>
+
+<pre>
+public class ViewModelLocator : ViewModelLocatorBase
+{
+}
+</pre>
+
+<p>Add an instance of this class to your App.xaml resource dictionary with the key &quot;Locator&quot;.</p>
+
+<pre>
+&lt;Application
+    x:Class="MyApp.App"
+    xmlns:vm="using:MyApp.ViewModels"&gt;
+    &lt;Application.Resources&gt;
+        &lt;ResourceDictionary&gt;
+            &lt;vm:ViewModelLocator x:Key="Locator" /&gt;
+        &lt;/ResourceDictionary&gt;
+    &lt;/Application.Resources&gt;
+&lt;/Application&gt;
+</pre>
+
+<p>Add a property for the main view model.</p>
+
+<pre>
+public class ViewModelLocator : ViewModelLocatorBase
+{
+    public object Main
+    {
+        get { return ViewModel(() => new MainViewModel()); }
+    }
+}
+</pre>
+
+<p>Bind the DataContext of the MainPage to the Main property of the Locator resource.</p>
+
+<pre>
+&lt;Page
+    x:Class="MyApp.MainPage" 
+    DataContext="{Binding Main, Source={StaticResource Locator}}" &gt;
+&lt;/Page&gt;
+</pre>
+
+<h3>Create an Application</h3>
+
+<p>Create an Application&lt;TRoot&gt; in the view model locator. Load the application with
+a root object.</p>
+
+<pre>
+public class ViewModelLocator : ViewModelLocatorBase
+{
+    private Application&lt;MyRootObject&gt; _application;
+        
+    public ViewModelLocator()
+    {
+        if (DesignMode)
+            _application = LoadDesignModeApplication();
+        else
+            _application = LoadApplication();
+    }
+
+    public object Main
+    {
+        get { return ViewModel(() => new MainViewModel(_application)); }
+    }
+
+    private static Application&lt;MyRootObject&gt; LoadDesignModeApplication()
+    {
+        var application = new Application&lt;MyRootObject&gt;();
+        application.Load(new MyRootObject());
+        return application;
+    }
+    
+    private static Application&lt;MyRootObject&gt; LoadApplication()
+    {
+        string folderName = "MyApp";
+        var store = new FileMessageStore(folderName);
+        var queue = new FileMessageQueue(folderName);
+        var bookmarkStore = new FileBookmarkStore(folderName);
+        var pump = new HttpMessagePump(
+            new Uri("http://host/api/distributor/", UriKind.Absolute),
+            queue,
+            bookmarkStore);
+        var push = new PushNotificationSubscription();
+        var application = new Application&lt;MyRootObject&gt;(
+            store, queue, pump, push);
+        application.Load(new MyRootObject());
+        return application;
+    }
+}
+</pre>
+
+<h3>Learn More on Pluralsight</h3>
 
 <p>This library was extracted from the example application built in <a href="http://www.pluralsight.com/courses/occasionally-connected-windows-mobile-apps-collaboration">
 Occasionally Connected Windows Mobile Apps: Collaboration</a>.
