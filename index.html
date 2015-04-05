@@ -112,6 +112,40 @@ public class ViewModelLocator : ViewModelLocatorBase
 
 <p>At this point, it's good to add a simple getter-only property to the main view model. Inside the getter, return a hard-coded value. Then data bind this to a control on the view. This will help you verify that you've completed all the steps properly.</p>
 
+<h3>Create a Model</h3>
+
+<p>Objects in your model implement the IMessageHandler interface. Create a root object with a default implementation.</p>
+
+<pre>
+public class MyRootObject : IMessageHandler
+{
+    private readonly Guid _id;
+
+    public MyRootObject(Guid id)
+    {
+        _id = id;
+    }
+
+    public Guid GetObjectId()
+    {
+        return _id;
+    }
+
+    public IEnumerable&lt;IMessageHandler&gt; Children
+    {
+        get { return Enumerable.Empty&lt;IMessageHandler&gt;(); }
+    }
+
+    public void HandleMessage(Message message)
+    {
+    }
+
+    public void HandleAllMessages(IEnumerable&lt;Message&gt; messages)
+    {
+    }
+}
+</pre>
+
 <h3>Create an Application</h3>
 
 <p>Create an Application&lt;TRoot&gt; in the view model locator. Load the application with
@@ -138,7 +172,7 @@ public class ViewModelLocator : ViewModelLocatorBase
     private static Application&lt;MyRootObject&gt; LoadDesignModeApplication()
     {
         var application = new Application&lt;MyRootObject&gt;();
-        application.Load(new MyRootObject());
+        application.Load(new MyRootObject(Guid.NewGuid()));
         return application;
     }
     
@@ -155,7 +189,7 @@ public class ViewModelLocator : ViewModelLocatorBase
         var push = new PushNotificationSubscription();
         var application = new Application&lt;MyRootObject&gt;(
             store, queue, pump, push);
-        application.Load(new MyRootObject());
+        application.Load(new MyRootObject(Guid.NewGuid()));
         return application;
     }
 }
