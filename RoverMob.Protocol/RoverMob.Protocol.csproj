@@ -48,13 +48,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>for %25%25f in (
-"$(SolutionDir)NuGet\Core\lib\net45\"
-) do (
-xcopy /y $(TargetPath) "%25%25~f"
-xcopy /y $(TargetDir)$(TargetName).xml "%25%25~f"
-)
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -3,7 +3,9 @@ using Assisticant.Fields;
 using RoverMob.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RoverMob
 {
@@ -57,18 +59,7 @@ namespace RoverMob
                 await _pushNotificationSubscription.Subscribe(
                     root.GetObjectId().ToCanonicalString());
 
-                List<IMessageHandler> loadedHandlers = new List<IMessageHandler>();
-                List<IMessageHandler> newHandlers = _messageHandlers.Values.ToList();
-                while (newHandlers.Any())
-                {
-                    foreach (var handler in newHandlers)
-                    {
-                        var messages = await _messageStore.LoadAsync(handler.GetObjectId());
-                        handler.HandleAllMessages(messages);
-                    }
-                    loadedHandlers.AddRange(newHandlers);
-                    newHandlers = _messageHandlers.Values.Except(loadedHandlers).ToList();
-                }
+                LoadNewObjects(ImmutableList<IMessageHandler>.Empty);
 
                 var queueMessages = await _messageQueue.LoadAsync();
                 _messagePump.SendAllMessages(queueMessages);
@@ -125,7 +116,34 @@ namespace RoverMob
         {
             IMessageHandler messageHandler;
             if (_messageHandlers.TryGetValue(message.ObjectId, out messageHandler))
+            {
+                var handlers = _messageHandlers.Values.ToImmutableList();
                 messageHandler.HandleMessage(message);
+                LoadNewObjects(handlers);
+            }
+        }
+
+        private async void LoadNewObjects(ImmutableList<IMessageHandler> loadedHandlers)
+        {
+            try
+            {
+                var newHandlers = _messageHandlers.Values.Except(loadedHandlers).ToImmutableList();
+                while (newHandlers.Any())
+                {
+                    foreach (var handler in newHandlers)
+                    {
+                        var messages = await _messageStore.LoadAsync(handler.GetObjectId());
+                        if (messages.Any())
+                            handler.HandleAllMessages(messages);
+                    }
+                    loadedHandlers = loadedHandlers.AddRange(newHandlers);
+                    newHandlers = _messageHandlers.Values.Except(loadedHandlers).ToImmutableList();
+                }
+            }
+            catch (Exception ex)
+            {
+                _exception.Value = ex;
+            }
         }
 
         private static IEnumerable<IMessageHandler> Decendants(IMessageHandler parent)
