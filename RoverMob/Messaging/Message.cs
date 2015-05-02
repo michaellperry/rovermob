@@ -15,7 +15,7 @@ namespace RoverMob.Messaging
     {
         private readonly string _topic;
         private readonly string _type;
-        private readonly ImmutableList<MessageHash> _predecessors;
+        private readonly ImmutableList<Predecessor> _predecessors;
         private readonly Guid _objectId;
         private readonly ExpandoObject _body;
         private readonly MessageHash _hash;
@@ -23,7 +23,7 @@ namespace RoverMob.Messaging
         private Message(
             string topic,
             string type,
-            ImmutableList<MessageHash> predecessors,
+            ImmutableList<Predecessor> predecessors,
             Guid objectId,
             ExpandoObject body,
             MessageHash hash)
@@ -46,9 +46,12 @@ namespace RoverMob.Messaging
             get { return _type; }
         }
 
-        public IImmutableList<MessageHash> Predecessors
+        public ImmutableList<MessageHash> GetPredecessors(string role)
         {
-            get { return _predecessors; }
+            return _predecessors
+                .Where(p => p.Role == role)
+                .Select(p => p.Hash)
+                .ToImmutableList();
         }
 
         public Guid ObjectId
@@ -75,7 +78,7 @@ namespace RoverMob.Messaging
             return CreateMessage(
                 topic,
                 messageType,
-                new List<MessageHash>(),
+                Predecessors.Set,
                 objectId,
                 body);
         }
@@ -83,18 +86,23 @@ namespace RoverMob.Messaging
         public static Message CreateMessage(
             string topic,
             string messageType,
-            IEnumerable<MessageHash> predecessors,
+            Predecessors predecessors,
             Guid objectId,
             object body)
         {
             // Convert the anonymous typed object to an ExpandoObject.
             var expandoBody = JsonConvert.DeserializeObject<ExpandoObject>(
                 JsonConvert.SerializeObject(body));
+            var predecessorList = predecessors.ToImmutableList();
             object document = new
             {
                 MessageType = messageType,
-                Predecessors = predecessors
-                    .Select(p => p.ToString())
+                Predecessors = predecessorList
+                    .Select(p => new
+                    {
+                        Role = p.Role,
+                        Hash = p.Hash.ToString()
+                    })
                     .ToArray(),
                 ObjectId = objectId,
                 Body = expandoBody
@@ -104,7 +112,7 @@ namespace RoverMob.Messaging
             return new Message(
                 topic,
                 messageType,
-                predecessors.ToImmutableList(),
+                predecessorList,
                 objectId,
                 expandoBody,
                 messageHash);
@@ -131,8 +139,12 @@ namespace RoverMob.Messaging
                 Topic = Topic,
                 Hash = Hash.ToString(),
                 MessageType = Type,
-                Predecessors = Predecessors
-                    .Select(p => p.ToString())
+                Predecessors = _predecessors
+                    .Select(p => new PredecessorMemento
+                    {
+                        Role = p.Role,
+                        Hash = p.Hash.ToString()
+                    })
                     .ToList(),
                 ObjectId = ObjectId,
                 Body = Body
@@ -145,7 +157,7 @@ namespace RoverMob.Messaging
                 memento.Topic,
                 memento.MessageType,
                 memento.Predecessors
-                    .Select(h => MessageHash.Parse(h))
+                    .Select(h => new Predecessor(h.Role, MessageHash.Parse(h.Hash)))
                     .ToImmutableList(),
                 memento.ObjectId,
                 memento.Body,

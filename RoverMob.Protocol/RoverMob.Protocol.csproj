@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="MessageMemento.cs" />
     <Compile Include="PageMemento.cs" />
+    <Compile Include="PredecessorMemento.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

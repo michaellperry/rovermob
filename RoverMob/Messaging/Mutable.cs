@@ -33,7 +33,8 @@ namespace RoverMob.Messaging
             return Message.CreateMessage(
                 _topic,
                 messageType,
-                Candidates.Select(t => t.MessageHash),
+                Predecessors.Set
+                    .In("prior", Candidates.Select(t => t.MessageHash)),
                 objectId,
                 new
                 {
@@ -45,7 +46,7 @@ namespace RoverMob.Messaging
         {
             var messageHash = message.Hash;
             T value = (T)message.Body.Value;
-            var predecessors = message.Predecessors;
+            var predecessors = message.GetPredecessors("prior");
 
             lock (this)
             {
@@ -67,7 +68,7 @@ namespace RoverMob.Messaging
         public void HandleAllMessages(IEnumerable<Message> messages)
         {
             var predecessors = messages
-                .SelectMany(m => m.Predecessors)
+                .SelectMany(m => m.GetPredecessors("prior"))
                 .ToLookup(h => h);
             var newCandidates = messages
                 .Where(m => !predecessors.Contains(m.Hash))

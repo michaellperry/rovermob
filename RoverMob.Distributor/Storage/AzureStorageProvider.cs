@@ -57,7 +57,7 @@ namespace RoverMob.Distributor.Storage
                     Hash = m.Hash,
                     Topic = m.PartitionKey,
                     MessageType = m.MessageType,
-                    Predecessors = JsonConvert.DeserializeObject<List<string>>(
+                    Predecessors = JsonConvert.DeserializeObject<List<PredecessorMemento>>(
                         m.Predecessors),
                     ObjectId = m.ObjectId,
                     Body = JsonConvert.DeserializeObject<ExpandoObject>(m.Body)
