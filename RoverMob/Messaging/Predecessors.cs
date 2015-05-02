@@ -24,6 +24,12 @@ namespace RoverMob.Messaging
             return this;
         }
 
+        public Predecessors In(string role, MessageHash hash)
+        {
+            _predecessors.Add(new Predecessor(role, hash));
+            return this;
+        }
+
         internal ImmutableList<Predecessor> ToImmutableList()
         {
             return _predecessors.ToImmutableList();
