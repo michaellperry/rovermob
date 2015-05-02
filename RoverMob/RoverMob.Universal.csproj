@@ -65,6 +65,7 @@
     <Compile Include="Messaging\Message.cs" />
     <Compile Include="Messaging\MessageDispatcher.cs" />
     <Compile Include="Messaging\MessageHash.cs" />
+    <Compile Include="Messaging\SuccessorCollection.cs" />
     <Compile Include="Messaging\Mutable.cs" />
     <Compile Include="Messaging\NoOpMessagePump.cs" />
     <Compile Include="Messaging\NoOpMessageQueue.cs" />
