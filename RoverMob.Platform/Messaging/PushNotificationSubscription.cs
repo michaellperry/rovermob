@@ -14,7 +14,16 @@ namespace RoverMob.Messaging
 {
     public class PushNotificationSubscription : IPushNotificationSubscription
     {
+        private readonly string _notificationHubPath;
+        private readonly string _connectionString;
+
         public event MessageReceivedHandler MessageReceived;
+
+        public PushNotificationSubscription(string notificationHubPath, string connectionString)
+        {
+            _connectionString = connectionString;
+            _notificationHubPath = notificationHubPath;
+        }
 
         public async Task Subscribe(string topic)
         {
@@ -25,7 +34,7 @@ namespace RoverMob.Messaging
                     .CreatePushNotificationChannelForApplicationAsync();
                 channel.PushNotificationReceived += channel_PushNotificationReceived;
 
-                var hub = new NotificationHub("occdist", "Endpoint=sb://occdist-ns.servicebus.windows.net/;SharedAccessKeyName=DefaultListenSharedAccessSignature;SharedAccessKey=+unDBkvenHMZKDwK8ZFZywiemEbFTC5Q64Op1J0TqZw=");
+                var hub = new NotificationHub(_notificationHubPath, _connectionString);
                 await hub.RegisterNativeAsync(channel.Uri,
                     new string[] { topic });
             }

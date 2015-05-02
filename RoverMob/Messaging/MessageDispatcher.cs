@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RoverMob.Messaging
 {
-    class MessageDispatcher<T>
+    public class MessageDispatcher<T>
     {
         private Dictionary<string, Action<T, Message>> _handlerByMessageType =
             new Dictionary<string,Action<T,Message>>();
