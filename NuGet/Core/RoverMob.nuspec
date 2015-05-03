@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>RoverMob</id>
-    <version>0.2.6</version>
+    <version>0.2.7</version>
     <title>Rover Mobile Application Framework</title>
     <authors>Michael L Perry</authors>
     <owners>Michael L Perry</owners>
@@ -47,10 +47,14 @@
     <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.xml" target="lib\wpa81" />
     <file src="..\..\RoverMob.Platform\bin\wpa81\Release\RoverMob.Platform.dll" target="lib\wpa81" />
     <file src="..\..\RoverMob.Platform\bin\wpa81\Release\RoverMob.Platform.xml" target="lib\wpa81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\wpa81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\wpa81" />
 
     <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.dll" target="lib\win81" />
     <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.xml" target="lib\win81" />
     <file src="..\..\RoverMob.Platform\bin\win81\Release\RoverMob.Platform.dll" target="lib\win81" />
     <file src="..\..\RoverMob.Platform\bin\win81\Release\RoverMob.Platform.xml" target="lib\win81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\win81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\win81" />
   </files>
 </package>
