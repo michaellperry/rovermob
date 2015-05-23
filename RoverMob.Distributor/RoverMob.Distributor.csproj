@@ -86,9 +86,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RoverMob.Protocol\RoverMob.Protocol.csproj">
-      <Project>{4aad27a4-f967-4f10-9360-6887a2b80359}</Project>
-      <Name>RoverMob.Protocol</Name>
+    <ProjectReference Include="..\RoverMob.Protocol\RoberMob.Protocol.csproj">
+      <Project>{3501199b-2e5d-4749-84d1-f19ae4cb04b0}</Project>
+      <Name>RoberMob.Protocol</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
