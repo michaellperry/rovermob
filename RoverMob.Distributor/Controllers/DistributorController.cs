@@ -24,6 +24,7 @@ namespace RoverMob.Distributor.Controllers
             _pushNotification = new AzurePushNotificationProvider(notificationConnectionString);
         }
 
+        [Authorize]
         public async Task Post(string topic, [FromBody]MessageMemento message)
         {
             string userId = this.User.Identity.Name;
@@ -35,6 +36,7 @@ namespace RoverMob.Distributor.Controllers
             await _pushNotification.SendNotificationAsync(topic, message);
         }
 
+        [Authorize]
         public async Task<PageMemento> Get(string topic, string bookmark)
         {
             string userId = this.User.Identity.Name;
