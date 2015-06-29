@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Web.Http;
+using Windows.Web.Http.Headers;
 
 namespace RoverMob.Messaging
 {
@@ -19,6 +20,7 @@ namespace RoverMob.Messaging
         private readonly Uri _uri;
         private readonly IMessageQueue _messageQueue;
         private readonly IBookmarkStore _bookmarkStore;
+        private readonly IAccessTokenProvider _accessTokenProvider;
 
         private ImmutableQueue<Message> _queue = ImmutableQueue<Message>.Empty;
 
@@ -28,11 +30,13 @@ namespace RoverMob.Messaging
         public HttpMessagePump(
             Uri uri,
             IMessageQueue messageQueue,
-            IBookmarkStore bookmarkStore)
+            IBookmarkStore bookmarkStore,
+            IAccessTokenProvider accessTokenProvider = null)
         {
             _uri = uri;
             _messageQueue = messageQueue;
             _bookmarkStore = bookmarkStore;
+            _accessTokenProvider = accessTokenProvider;
         }
 
         public void Subscribe(string topic)
@@ -66,12 +70,27 @@ namespace RoverMob.Messaging
 
         private async Task SendAndReceiveMessagesInternalAsync()
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                await SendMessagesInternalAsync(client);
+                using (HttpClient client = new HttpClient())
+                {
+                    if (_accessTokenProvider != null)
+                    {
+                        string accessToken = await _accessTokenProvider.GetAccessTokenAsync();
+                        client.DefaultRequestHeaders.Authorization =
+                            new HttpCredentialsHeaderValue("Bearer", accessToken);
+                    }
+                    await SendMessagesInternalAsync(client);
 
-                foreach (var topic in _topics)
-                    await ReceiveMessagesInternalAsync(client, topic);
+                    foreach (var topic in _topics)
+                        await ReceiveMessagesInternalAsync(client, topic);
+                }
+            }
+            catch (Exception x)
+            {
+                if (_accessTokenProvider != null)
+                    _accessTokenProvider.RefreshAccessToken();
+                throw;
             }
         }
 

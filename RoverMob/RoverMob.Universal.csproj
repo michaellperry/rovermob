@@ -56,6 +56,7 @@
     <Compile Include="Messaging\FileMessageQueue.cs" />
     <Compile Include="Messaging\FileMessageStore.cs" />
     <Compile Include="Messaging\HttpMessagePump.cs" />
+    <Compile Include="Messaging\IAccessTokenProvider.cs" />
     <Compile Include="Messaging\IBookmarkStore.cs" />
     <Compile Include="Messaging\IMessageHandler.cs" />
     <Compile Include="Messaging\IMessagePump.cs" />
