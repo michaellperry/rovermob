@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Web.Http;
 using Windows.Web.Http.Headers;
+using Windows.Web.Http.Filters;
 
 namespace RoverMob.Messaging
 {
@@ -72,7 +73,11 @@ namespace RoverMob.Messaging
         {
             try
             {
-                using (HttpClient client = new HttpClient())
+                var httpBaseFilder = new HttpBaseProtocolFilter
+                {
+                    AllowUI = false
+                };
+                using (HttpClient client = new HttpClient(httpBaseFilder))
                 {
                     if (_accessTokenProvider != null)
                     {
