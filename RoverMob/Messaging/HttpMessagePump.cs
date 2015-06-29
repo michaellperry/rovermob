@@ -76,9 +76,11 @@ namespace RoverMob.Messaging
                 {
                     if (_accessTokenProvider != null)
                     {
-                        string accessToken = await _accessTokenProvider.GetAccessTokenAsync();
+                        string accessToken = await _accessTokenProvider
+                            .GetAccessTokenAsync();
                         client.DefaultRequestHeaders.Authorization =
-                            new HttpCredentialsHeaderValue("Bearer", accessToken);
+                            new HttpCredentialsHeaderValue(
+                                "Bearer", accessToken);
                     }
                     await SendMessagesInternalAsync(client);
 

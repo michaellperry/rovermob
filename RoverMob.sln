@@ -11,6 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoverMob.Distributor", "Rov
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{F72AC2FD-CCF3-410D-BC5A-D5EE893C892C}"
 	ProjectSection(SolutionItems) = preProject
+		NuGet\Distributor\RoverMob.Distributor.nuspec = NuGet\Distributor\RoverMob.Distributor.nuspec
 		NuGet\Core\RoverMob.nuspec = NuGet\Core\RoverMob.nuspec
 	EndProjectSection
 EndProject

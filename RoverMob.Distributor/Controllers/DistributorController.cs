@@ -26,13 +26,28 @@ namespace RoverMob.Distributor.Controllers
 
         public async Task Post(string topic, [FromBody]MessageMemento message)
         {
+            string userId = this.User.Identity.Name;
+            bool authorized = await AuthorizeUserForPost(topic, userId);
+            if (!authorized)
+                throw new UnauthorizedAccessException();
+
             _storage.WriteMessage(topic, message);
             await _pushNotification.SendNotificationAsync(topic, message);
         }
 
-        public PageMemento Get(string topic, string bookmark)
+        public async Task<PageMemento> Get(string topic, string bookmark)
         {
+            string userId = this.User.Identity.Name;
+            bool authorized = await AuthorizeUserForGet(topic, userId);
+            if (!authorized)
+                throw new UnauthorizedAccessException();
+
             return _storage.ReadMessages(topic, bookmark);
         }
+
+        protected abstract Task<bool> AuthorizeUserForPost(
+            string topic, string userId);
+        protected abstract Task<bool> AuthorizeUserForGet(
+            string topic, string userId);
     }
 }
