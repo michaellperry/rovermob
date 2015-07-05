@@ -55,7 +55,6 @@ namespace RoverMob
             {
                 _root.Value = root;
 
-                _messagePump.Subscribe(root.GetObjectId().ToCanonicalString());
                 await _pushNotificationSubscription.Subscribe(
                     root.GetObjectId().ToCanonicalString());
 

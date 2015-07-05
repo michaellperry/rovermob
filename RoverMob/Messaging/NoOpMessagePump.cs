@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace RoverMob.Messaging
 {
@@ -7,7 +8,7 @@ namespace RoverMob.Messaging
     {
         public event MessageReceivedHandler MessageReceived;
 
-        public void Subscribe(string topic)
+        public void Subscribe(Func<IEnumerable<string>> subscription)
         {
         }
 

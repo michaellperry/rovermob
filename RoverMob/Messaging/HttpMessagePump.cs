@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Windows.Web.Http;
 using Windows.Web.Http.Headers;
 using Windows.Web.Http.Filters;
+using Assisticant.Fields;
+using Assisticant.Collections;
 
 namespace RoverMob.Messaging
 {
@@ -25,7 +27,9 @@ namespace RoverMob.Messaging
 
         private ImmutableQueue<Message> _queue = ImmutableQueue<Message>.Empty;
 
-        private List<string> _topics = new List<string>();
+        private ObservableList<Func<IEnumerable<string>>> _subscriptions = new ObservableList<Func<IEnumerable<string>>>();
+        private Computed<List<string>> _topics;
+        private ComputedSubscription _updateTopics;
         private Dictionary<string, string> _bookmarkByTopic = new Dictionary<string, string>();
         
         public HttpMessagePump(
@@ -38,11 +42,14 @@ namespace RoverMob.Messaging
             _messageQueue = messageQueue;
             _bookmarkStore = bookmarkStore;
             _accessTokenProvider = accessTokenProvider;
+
+            _topics = new Computed<List<string>>(() => _subscriptions.SelectMany(s => s()).ToList());
+            _updateTopics = _topics.Subscribe(_ => SendAndReceiveMessages());
         }
 
-        public void Subscribe(string topic)
+        public void Subscribe(Func<IEnumerable<string>> subscription)
         {
-            _topics.Add(topic);
+            _subscriptions.Add(subscription);
         }
 
         public void SendAllMessages(ImmutableList<Message> messages)
@@ -89,7 +96,7 @@ namespace RoverMob.Messaging
                     }
                     await SendMessagesInternalAsync(client);
 
-                    foreach (var topic in _topics)
+                    foreach (var topic in _topics.Value)
                         await ReceiveMessagesInternalAsync(client, topic);
                 }
             }
