@@ -69,15 +69,18 @@ namespace RoverMob.Distributor.Storage
         {
             var userIdentifierTable = OpenTable("UserIdentifier");
 
+            // The row key must not contain special characters.
+            var encodedUserId = Uri.EscapeDataString(userId);
+
             // First try to retrieve an existing entity.
             var retrieve = TableOperation.Retrieve<UserIdentifierEntity>(
-                role, userId);
+                role, encodedUserId);
             var retrieveResult = userIdentifierTable.Execute(retrieve);
             if (retrieveResult.Result != null)
                 return ((UserIdentifierEntity)retrieveResult.Result).Identifier;
 
             // Then create a new one if the existing one is not present.
-            var entity = new UserIdentifierEntity(role, userId)
+            var entity = new UserIdentifierEntity(role, encodedUserId)
             {
                 Identifier = Guid.NewGuid()
             };
