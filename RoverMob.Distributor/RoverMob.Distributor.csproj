@@ -82,10 +82,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\DistributorController.cs" />
+    <Compile Include="Controllers\UserIdentifierController.cs" />
     <Compile Include="Notification\AzurePushNotificationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\AzureStorageProvider.cs" />
     <Compile Include="Storage\MessageEntity.cs" />
+    <Compile Include="Storage\UserIdentifierEntity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

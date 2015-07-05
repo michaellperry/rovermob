@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 
 namespace RoverMob.Distributor.Controllers
 {
+    [Authorize]
     public abstract class DistributorController : ApiController
     {
-        private AzureStorageProvider _storage;
-        private AzurePushNotificationProvider _pushNotification;
+        private readonly AzureStorageProvider _storage;
+        private readonly AzurePushNotificationProvider _pushNotification;
 
         protected DistributorController(
             string storageConnectionString,
@@ -24,7 +25,6 @@ namespace RoverMob.Distributor.Controllers
             _pushNotification = new AzurePushNotificationProvider(notificationConnectionString);
         }
 
-        [Authorize]
         public async Task Post(string topic, [FromBody]MessageMemento message)
         {
             string userId = this.User.Identity.Name;
@@ -36,7 +36,6 @@ namespace RoverMob.Distributor.Controllers
             await _pushNotification.SendNotificationAsync(topic, message);
         }
 
-        [Authorize]
         public async Task<PageMemento> Get(string topic, string bookmark)
         {
             string userId = this.User.Identity.Name;
@@ -51,5 +50,26 @@ namespace RoverMob.Distributor.Controllers
             string topic, string userId);
         protected abstract Task<bool> AuthorizeUserForGet(
             string topic, string userId);
+
+        protected Guid GetUserIdentifier(string role, string userId)
+        {
+            return _storage.GetUserIdentifier(role, userId);
+        }
+
+        protected IEnumerable<MessageMemento> GetMessagesInTopic(string topic)
+        {
+            string bookmark = string.Empty;
+            while (true)
+            {
+                PageMemento page = _storage.ReadMessages(topic, bookmark);
+                if (!page.Messages.Any())
+                    break;
+
+                foreach (var message in page.Messages)
+                    yield return message;
+
+                bookmark = page.Bookmark;
+            }
+        }
     }
 }

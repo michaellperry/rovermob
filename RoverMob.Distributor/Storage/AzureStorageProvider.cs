@@ -20,7 +20,7 @@ namespace RoverMob.Distributor.Storage
 
         public void WriteMessage(string topic, MessageMemento message)
         {
-            var messageTable = OpenMessageTable();
+            var messageTable = OpenTable("Message");
 
             var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmssfffffff");
             var entity = new MessageEntity(topic, timestamp);
@@ -36,7 +36,7 @@ namespace RoverMob.Distributor.Storage
 
         public PageMemento ReadMessages(string topic, string bookmark)
         {
-            var messageTable = OpenMessageTable();
+            var messageTable = OpenTable("Message");
 
             var query = new TableQuery<MessageEntity>().Where(
                 TableQuery.CombineFilters(
@@ -65,12 +65,33 @@ namespace RoverMob.Distributor.Storage
             };
         }
 
-        private CloudTable OpenMessageTable()
+        public Guid GetUserIdentifier(string role, string userId)
+        {
+            var userIdentifierTable = OpenTable("UserIdentifier");
+
+            // First try to retrieve an existing entity.
+            var retrieve = TableOperation.Retrieve<UserIdentifierEntity>(
+                role, userId);
+            var retrieveResult = userIdentifierTable.Execute(retrieve);
+            if (retrieveResult.Result != null)
+                return ((UserIdentifierEntity)retrieveResult.Result).Identifier;
+
+            // Then create a new one if the existing one is not present.
+            var entity = new UserIdentifierEntity(role, userId)
+            {
+                Identifier = Guid.NewGuid()
+            };
+            var insert = TableOperation.Insert(entity);
+            userIdentifierTable.Execute(insert);
+            return entity.Identifier;
+        }
+
+        private CloudTable OpenTable(string tableName)
         {
             var storageAccount = CloudStorageAccount.Parse(_storageConnectionString);
 
             var tableClient = storageAccount.CreateCloudTableClient();
-            var messageTable = tableClient.GetTableReference("Message");
+            var messageTable = tableClient.GetTableReference(tableName);
             messageTable.CreateIfNotExists();
 
             return messageTable;
