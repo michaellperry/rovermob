@@ -56,7 +56,27 @@ namespace RoverMob.Distributor.Controllers
             return _storage.GetUserIdentifier(role, userId);
         }
 
-        protected IEnumerable<MessageMemento> GetMessagesInTopic(string topic)
+        protected IEnumerable<dynamic> GetMessagesInTopic(
+            string topic,
+            string createdByMessageType,
+            string removedByMessageType,
+            string removedByRole)
+        {
+            var messages = GetMessagesInTopic(topic).ToList();
+            var predecessors = messages
+                .Where(m => m.MessageType == removedByMessageType)
+                .SelectMany(m => m.Predecessors)
+                .Where(p => p.Role == removedByRole)
+                .Select(p => p.Hash)
+                .ToDictionary(h => h);
+            return messages
+                .Where(m =>
+                    m.MessageType == createdByMessageType &&
+                    !predecessors.ContainsKey(m.Hash))
+                .Select(m => m.Body);
+        }
+
+        private IEnumerable<MessageMemento> GetMessagesInTopic(string topic)
         {
             string bookmark = string.Empty;
             while (true)
