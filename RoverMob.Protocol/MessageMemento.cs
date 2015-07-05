@@ -6,7 +6,7 @@ namespace RoverMob.Protocol
 {
     public class MessageMemento
     {
-        public string Topic { get; set; }
+        public List<string> Topics { get; set; }
         public string Hash { get; set; }
         public string MessageType { get; set; }
         public List<PredecessorMemento> Predecessors { get; set; }

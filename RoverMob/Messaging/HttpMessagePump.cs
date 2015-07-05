@@ -135,9 +135,12 @@ namespace RoverMob.Messaging
 		        Windows.Storage.Streams.UnicodeEncoding.Utf8,
 		        "application/json"))
             {
-                var resourceUri = new Uri(_uri, message.Topic);
-                var response = await client.PostAsync(resourceUri, content);
-                response.EnsureSuccessStatusCode();
+                foreach (var topic in message.Topics)
+                {
+                    var resourceUri = new Uri(_uri, topic);
+                    var response = await client.PostAsync(resourceUri, content);
+                    response.EnsureSuccessStatusCode();
+                }
             }
         }
 

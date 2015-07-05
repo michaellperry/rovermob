@@ -13,7 +13,7 @@ namespace RoverMob.Messaging
 {
     public class Message
     {
-        private readonly string _topic;
+        private readonly ImmutableList<string> _topics;
         private readonly string _type;
         private readonly ImmutableList<Predecessor> _predecessors;
         private readonly Guid _objectId;
@@ -21,14 +21,14 @@ namespace RoverMob.Messaging
         private readonly MessageHash _hash;
 
         private Message(
-            string topic,
+            ImmutableList<string> topics,
             string type,
             ImmutableList<Predecessor> predecessors,
             Guid objectId,
             ExpandoObject body,
             MessageHash hash)
         {
-            _topic = topic;
+            _topics = topics;
             _type = type;
             _predecessors = predecessors;
             _objectId = objectId;
@@ -36,9 +36,9 @@ namespace RoverMob.Messaging
             _hash = hash;
         }
 
-        public string Topic
+        public ImmutableList<string> Topics
         {
-            get { return _topic; }
+            get { return _topics; }
         }
 
         public string Type
@@ -90,6 +90,21 @@ namespace RoverMob.Messaging
             Guid objectId,
             object body)
         {
+            return CreateMessage(
+                new TopicSet().Add(topic),
+                messageType,
+                predecessors,
+                objectId,
+                body);
+        }
+
+        public static Message CreateMessage(
+            TopicSet topicSet,
+            string messageType,
+            Predecessors predecessors,
+            Guid objectId,
+            object body)
+        {
             // Convert the anonymous typed object to an ExpandoObject.
             var expandoBody = JsonConvert.DeserializeObject<ExpandoObject>(
                 JsonConvert.SerializeObject(body));
@@ -110,7 +125,7 @@ namespace RoverMob.Messaging
             var messageHash = new MessageHash(ComputeHash(document));
 
             return new Message(
-                topic,
+                topicSet.ToImmutableList(),
                 messageType,
                 predecessorList,
                 objectId,
@@ -136,7 +151,7 @@ namespace RoverMob.Messaging
         {
             return new MessageMemento()
             {
-                Topic = Topic,
+                Topics = Topics.ToList(),
                 Hash = Hash.ToString(),
                 MessageType = Type,
                 Predecessors = _predecessors
@@ -154,7 +169,7 @@ namespace RoverMob.Messaging
         public static Message FromMemento(MessageMemento memento)
         {
             return new Message(
-                memento.Topic,
+                memento.Topics.ToImmutableList(),
                 memento.MessageType,
                 memento.Predecessors
                     .Select(h => new Predecessor(h.Role, MessageHash.Parse(h.Hash)))

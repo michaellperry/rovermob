@@ -55,7 +55,7 @@ namespace RoverMob.Distributor.Storage
                 Messages = messages.Select(m => new MessageMemento
                 {
                     Hash = m.Hash,
-                    Topic = m.PartitionKey,
+                    Topics = new List<string> { topic },
                     MessageType = m.MessageType,
                     Predecessors = JsonConvert.DeserializeObject<List<PredecessorMemento>>(
                         m.Predecessors),
