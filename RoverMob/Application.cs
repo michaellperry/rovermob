@@ -16,18 +16,20 @@ namespace RoverMob
         private readonly IMessageQueue _messageQueue;
         private readonly IMessagePump _messagePump;
         private readonly IPushNotificationSubscription _pushNotificationSubscription;
+        private readonly IUserProxy _userProxy;
 
         private Observable<TRoot> _root = new Observable<TRoot>();
         private ComputedDictionary<Guid, IMessageHandler> _messageHandlers;
 
         private Observable<Exception> _exception = new Observable<Exception>();
-
+        
         public Application()
             : this(
                 new NoOpMessageStore(),
                 new NoOpMessageQueue(),
                 new NoOpMessagePump(),
-                new NoOpPushNotificationSubscription())
+                new NoOpPushNotificationSubscription(),
+                new NoOpUserProxy())
         {
         }
 
@@ -35,18 +37,40 @@ namespace RoverMob
             IMessageStore messageStore,
             IMessageQueue messageQueue,
             IMessagePump messagePump,
-            IPushNotificationSubscription pushNotificationSubscription)
+            IPushNotificationSubscription pushNotificationSubscription,
+            IUserProxy userProxy)
         {
             _messageStore = messageStore;
             _messageQueue = messageQueue;
             _messagePump = messagePump;
             _pushNotificationSubscription = pushNotificationSubscription;
+            _userProxy = userProxy;
 
             _messagePump.MessageReceived += MessageReceived;
             _pushNotificationSubscription.MessageReceived += NotificationReceived;
 
             _messageHandlers = new ComputedDictionary<Guid, IMessageHandler>(() =>
                 Decendants(_root.Value).ToDictionary(m => m.GetObjectId()));
+        }
+
+        public async void GetUserIdentifier(string role, Action<Guid> callback)
+        {
+            try
+            {
+                Guid? localUserIdentifier = await _messageStore.GetUserIdentifierAsync(role);
+                if (localUserIdentifier != null)
+                    callback(localUserIdentifier.Value);
+                else
+                {
+                    Guid userIdentifier = await _userProxy.GetUserIdentifier(role);
+                    _messageStore.SaveUserIdentifier(role, userIdentifier);
+                    callback(userIdentifier);
+                }
+            }
+            catch (Exception x)
+            {
+                _exception.Value = x;
+            }
         }
 
         public async void Load(TRoot root)
@@ -147,8 +171,11 @@ namespace RoverMob
 
         private static IEnumerable<IMessageHandler> Decendants(IMessageHandler parent)
         {
-            return new List<IMessageHandler>() { parent }
-                .Concat(parent.Children.SelectMany(c => Decendants(c)));
+            if (parent != null)
+                return new List<IMessageHandler>() { parent }
+                    .Concat(parent.Children.SelectMany(c => Decendants(c)));
+            else
+                return new List<IMessageHandler>();
         }
     }
 }

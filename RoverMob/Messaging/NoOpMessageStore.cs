@@ -24,5 +24,14 @@ namespace RoverMob.Messaging
             _messagesByObjectId = _messagesByObjectId.SetItem(
                 objectId, messages.Add(message));
         }
+
+        public Task<Guid?> GetUserIdentifierAsync(string role)
+        {
+            return Task.FromResult((Guid?)Guid.NewGuid());
+        }
+
+        public void SaveUserIdentifier(string role, Guid userIdentifier)
+        {
+        }
     }
 }

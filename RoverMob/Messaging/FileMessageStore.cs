@@ -34,6 +34,18 @@ namespace RoverMob.Messaging
             Perform(() => SaveInternalAsync(message));
         }
 
+        public Task<Guid?> GetUserIdentifierAsync(string role)
+        {
+            var completion = new TaskCompletionSource<Guid?>();
+            Perform(() => GetUserIdentifierInternalAsync(role, completion));
+            return completion.Task;
+        }
+
+        public void SaveUserIdentifier(string role, Guid userIdentifier)
+        {
+            Perform(() => SaveUserIdentifierInternalAsync(role, userIdentifier));
+        }
+
         private async Task LoadInternalAsync(Guid objectId, TaskCompletionSource<ImmutableList<Message>> completion)
         {
             try
@@ -59,6 +71,37 @@ namespace RoverMob.Messaging
             {
                 messages.Add(message.GetMemento());
                 await WriteMessagesAsync(file, messages);
+            }
+        }
+
+        private async Task SaveUserIdentifierInternalAsync(string role, Guid userIdentifier)
+        {
+            var userFile = await CreateUserFileAsync(role);
+            var outputStream = await userFile.OpenStreamForWriteAsync();
+            using (var writer = new StreamWriter(outputStream))
+            {
+                await writer.WriteAsync(userIdentifier.ToCanonicalString());
+            }
+        }
+
+        private async Task GetUserIdentifierInternalAsync(string role, TaskCompletionSource<System.Guid?> completion)
+        {
+            try
+            {
+                var userFile = await CreateUserFileAsync(role);
+                var inputStream = await userFile.OpenStreamForReadAsync();
+                using (var reader = new StreamReader(inputStream))
+                {
+                    string line = await reader.ReadLineAsync();
+                    if (string.IsNullOrEmpty(line))
+                        completion.SetResult(null);
+                    else
+                        completion.SetResult(Guid.Parse(line));
+                }
+            }
+            catch (Exception x)
+            {
+                completion.SetException(x);
             }
         }
 
@@ -94,6 +137,16 @@ namespace RoverMob.Messaging
             {
                 _serializer.Serialize(writer, messageList);
             }
+        }
+
+        private async Task<StorageFile> CreateUserFileAsync(string role)
+        {
+            var RoverMobFolder = await ApplicationData.Current.LocalFolder
+                .CreateFolderAsync(_folderName, CreationCollisionOption.OpenIfExists);
+            string fileName = String.Format("user_{0}.txt", role);
+            var userFile = await RoverMobFolder
+                .CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
+            return userFile;
         }
     }
 }

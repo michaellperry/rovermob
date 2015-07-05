@@ -8,5 +8,8 @@ namespace RoverMob.Messaging
     {
         Task<ImmutableList<Message>> LoadAsync(Guid objectId);
         void Save(Message message);
+
+        Task<Guid?> GetUserIdentifierAsync(string role);
+        void SaveUserIdentifier(string role, Guid userIdentifier);
     }
 }
