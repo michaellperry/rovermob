@@ -57,12 +57,14 @@ namespace RoverMob
         {
             try
             {
-                Guid? localUserIdentifier = await _messageStore.GetUserIdentifierAsync(role);
+                Guid? localUserIdentifier = await _messageStore
+                    .GetUserIdentifierAsync(role);
                 if (localUserIdentifier != null)
                     callback(localUserIdentifier.Value);
                 else
                 {
-                    Guid userIdentifier = await _userProxy.GetUserIdentifier(role);
+                    Guid userIdentifier = await _userProxy
+                        .GetUserIdentifier(role);
                     _messageStore.SaveUserIdentifier(role, userIdentifier);
                     callback(userIdentifier);
                 }
