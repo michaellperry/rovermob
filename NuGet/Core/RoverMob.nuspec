@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>RoverMob</id>
-    <version>0.2.13</version>
+    <version>0.2.15</version>
     <title>Rover Mobile Application Framework</title>
     <authors>Michael L Perry</authors>
     <owners>Michael L Perry</owners>
@@ -14,47 +14,63 @@
     <copyright>Copyright 2015</copyright>
     <tags>Mobile</tags>
     <dependencies>
-      <group targetFramework="portable-win81+wpa81">
-        <dependency id="Assisticant" version="[1.1.4.1,)" />
-        <dependency id="Microsoft.Bcl.Immutable" version="[1.0.34,)" />
+      <group targetFramework="portable-net451+wpa81+win81">
+        <dependency id="Assisticant" version="[1.1.4.2,)" />
+        <dependency id="System.Collections.Immutable" version="[1.1.36,)" />
         <dependency id="Newtonsoft.Json" version="[6.0.8,)" />
       </group>
 
+      <group targetFramework="net451">
+        <dependency id="Assisticant" version="[1.1.4.2,)" />
+        <dependency id="System.Collections.Immutable" version="[1.1.36,)" />
+        <dependency id="Newtonsoft.Json" version="[6.0.8,)" />
+        <dependency id="Microsoft.Net.Http" version="[2.2.29,)" />
+      </group>
+
       <group targetFramework="win81">
-        <dependency id="Assisticant" version="[1.1.4.1,)" />
-        <dependency id="Microsoft.Bcl.Immutable" version="[1.0.34,)" />
+        <dependency id="Assisticant" version="[1.1.4.2,)" />
+        <dependency id="System.Collections.Immutable" version="[1.1.36,)" />
         <dependency id="Newtonsoft.Json" version="[6.0.8,)" />
         <dependency id="WindowsAzure.Messaging.Managed" version="[0.1.7.9,)" />
       </group>
 
       <group targetFramework="wpa81">
-        <dependency id="Assisticant" version="[1.1.4.1,)" />
-        <dependency id="Microsoft.Bcl.Immutable" version="[1.0.34,)" />
+        <dependency id="Assisticant" version="[1.1.4.2,)" />
+        <dependency id="System.Collections.Immutable" version="[1.1.36,)" />
         <dependency id="Newtonsoft.Json" version="[6.0.8,)" />
         <dependency id="WindowsAzure.Messaging.Managed" version="[0.1.7.9,)" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.dll" target="lib\portable-wpa81+win81" />
-    <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.xml" target="lib\portable-wpa81+win81" />
-    <file src="..\..\RoverMob.Platform\bin\portable-wpa81+win81\Release\RoverMob.Platform.dll" target="lib\portable-wpa81+win81" />
-    <file src="..\..\RoverMob.Platform\bin\portable-wpa81+win81\Release\RoverMob.Platform.xml" target="lib\portable-wpa81+win81" />
-    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\portable-wpa81+win81" />
-    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\portable-wpa81+win81" />
+    <file src="..\..\RoverMob\bin\portable-net451+wpa81+win81\Release\RoverMob.dll" target="lib\net451" />
+    <file src="..\..\RoverMob\bin\portable-net451+wpa81+win81\Release\RoverMob.xml" target="lib\net451" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-net451+wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\net451" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-net451+wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\net451" />
+    <file src="..\..\RoverMob.Implementation.Net45\bin\Release\RoverMob.Implementation.dll" target="lib\net451" />
 
-    <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.dll" target="lib\wpa81" />
-    <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.xml" target="lib\wpa81" />
+    <file src="..\..\RoverMob\bin\portable-net451+wpa81+win81\Release\RoverMob.dll" target="lib\portable-net451+wpa81+win81" />
+    <file src="..\..\RoverMob\bin\portable-net451+wpa81+win81\Release\RoverMob.xml" target="lib\portable-net451+wpa81+win81" />
+    <file src="..\..\RoverMob.Platform\bin\portable-wpa81+win81\Release\RoverMob.Platform.dll" target="lib\portable-net451+wpa81+win81" />
+    <file src="..\..\RoverMob.Platform\bin\portable-wpa81+win81\Release\RoverMob.Platform.xml" target="lib\portable-net451+wpa81+win81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-net451+wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\portable-net451+wpa81+win81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-net451+wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\portable-net451+wpa81+win81" />
+    <file src="..\..\RoverMob.Implementation\bin\Release\RoverMob.Implementation.dll" target="lib\portable-net451+wpa81+win81" />
+
+    <file src="..\..\RoverMob\bin\portable-net451+wpa81+win81\Release\RoverMob.dll" target="lib\wpa81" />
+    <file src="..\..\RoverMob\bin\portable-net451+wpa81+win81\Release\RoverMob.xml" target="lib\wpa81" />
     <file src="..\..\RoverMob.Platform\bin\wpa81\Release\RoverMob.Platform.dll" target="lib\wpa81" />
     <file src="..\..\RoverMob.Platform\bin\wpa81\Release\RoverMob.Platform.xml" target="lib\wpa81" />
-    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\wpa81" />
-    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\wpa81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-net451+wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\wpa81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-net451+wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\wpa81" />
+    <file src="..\..\RoverMob.Implementation.Universal\bin\Release\RoverMob.Implementation.dll" target="lib\wpa81" />
 
-    <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.dll" target="lib\win81" />
-    <file src="..\..\RoverMob\bin\portable-wpa81+win81\Release\RoverMob.xml" target="lib\win81" />
+    <file src="..\..\RoverMob\bin\portable-net451+wpa81+win81\Release\RoverMob.dll" target="lib\win81" />
+    <file src="..\..\RoverMob\bin\portable-net451+wpa81+win81\Release\RoverMob.xml" target="lib\win81" />
     <file src="..\..\RoverMob.Platform\bin\win81\Release\RoverMob.Platform.dll" target="lib\win81" />
     <file src="..\..\RoverMob.Platform\bin\win81\Release\RoverMob.Platform.xml" target="lib\win81" />
-    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\win81" />
-    <file src="..\..\RoverMob.Protocol\bin\portable-wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\win81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-net451+wpa81+win81\Release\RoverMob.Protocol.dll" target="lib\win81" />
+    <file src="..\..\RoverMob.Protocol\bin\portable-net451+wpa81+win81\Release\RoverMob.Protocol.xml" target="lib\win81" />
+    <file src="..\..\RoverMob.Implementation.Universal\bin\Release\RoverMob.Implementation.dll" target="lib\win81" />
   </files>
 </package>

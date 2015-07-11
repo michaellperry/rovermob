@@ -8,11 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Web.Http;
-using Windows.Web.Http.Headers;
-using Windows.Web.Http.Filters;
 using Assisticant.Fields;
 using Assisticant.Collections;
+using RoverMob.Implementation;
 
 namespace RoverMob.Messaging
 {
@@ -31,7 +29,7 @@ namespace RoverMob.Messaging
         private Computed<List<string>> _topics;
         private ComputedSubscription _updateTopics;
         private Dictionary<string, string> _bookmarkByTopic = new Dictionary<string, string>();
-        
+
         public HttpMessagePump(
             Uri uri,
             IMessageQueue messageQueue,
@@ -80,20 +78,14 @@ namespace RoverMob.Messaging
         {
             try
             {
-                var httpBaseFilder = new HttpBaseProtocolFilter
+                string accessToken;
+                if (_accessTokenProvider != null)
+                    accessToken = await _accessTokenProvider.GetAccessTokenAsync();
+                else
+                    accessToken = null;
+                using (var client = await HttpImplementation.CreateProxyAsync(
+                    accessToken))
                 {
-                    AllowUI = false
-                };
-                using (HttpClient client = new HttpClient(httpBaseFilder))
-                {
-                    if (_accessTokenProvider != null)
-                    {
-                        string accessToken = await _accessTokenProvider
-                            .GetAccessTokenAsync();
-                        client.DefaultRequestHeaders.Authorization =
-                            new HttpCredentialsHeaderValue(
-                                "Bearer", accessToken);
-                    }
                     await SendMessagesInternalAsync(client);
 
                     foreach (var topic in _topics.Value)
@@ -108,7 +100,7 @@ namespace RoverMob.Messaging
             }
         }
 
-        private async Task SendMessagesInternalAsync(HttpClient client)
+        private async Task SendMessagesInternalAsync(HttpProxy client)
         {
             while (true)
             {
@@ -127,24 +119,18 @@ namespace RoverMob.Messaging
             }
         }
 
-        private async Task SendMessageAsync(HttpClient client, Message message)
+        private async Task SendMessageAsync(HttpProxy client, Message message)
         {
             var json = JsonConvert.SerializeObject(message.GetMemento());
-            using (var content = new HttpStringContent(
-		        json,
-		        Windows.Storage.Streams.UnicodeEncoding.Utf8,
-		        "application/json"))
+
+            foreach (var topic in message.Topics)
             {
-                foreach (var topic in message.Topics)
-                {
-                    var resourceUri = new Uri(_uri, topic);
-                    var response = await client.PostAsync(resourceUri, content);
-                    response.EnsureSuccessStatusCode();
-                }
+                var resourceUri = new Uri(_uri, topic);
+                await client.PostJsonAsync(resourceUri, json);
             }
         }
 
-        private async Task ReceiveMessagesInternalAsync(HttpClient client, string topic)
+        private async Task ReceiveMessagesInternalAsync(HttpProxy client, string topic)
         {
             string bookmark;
             if (!_bookmarkByTopic.TryGetValue(topic, out bookmark))
@@ -153,10 +139,7 @@ namespace RoverMob.Messaging
             while (true)
             {
                 Uri resourceUri = new Uri(_uri, String.Format("{0}?bookmark={1}", topic, bookmark));
-                var response = await client.GetAsync(resourceUri);
-                response.EnsureSuccessStatusCode();
-
-                var jsonString = await response.Content.ReadAsStringAsync();
+                var jsonString = await client.GetJsonAsync(resourceUri);
                 var page = JsonConvert.DeserializeObject<PageMemento>(jsonString);
                 if (page.Messages.Count == 0)
                     return;

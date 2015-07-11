@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>RoverMob.Distributor</id>
-    <version>0.2.8</version>
+    <version>0.2.9</version>
     <title>Rover Mobile Distributor</title>
     <authors>Michael L Perry</authors>
     <owners>Michael L Perry</owners>
@@ -14,7 +14,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>Mobile</tags>
     <dependencies>
-      <group targetFramework=".NETFramework4.5">
+      <group targetFramework=".NETFramework4.5.1">
         <dependency id="WindowsAzure.Storage" version="[4.3.0,)" />
         <dependency id="WindowsAzure.ServiceBus" version="[2.7.3,)" />
         <dependency id="Microsoft.AspNet.WebApi.Core" version="[5.2.3,)" />
@@ -23,7 +23,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\RoverMob.Distributor\bin\Release\RoverMob.Distributor.dll" target="lib\net45" />
-    <file src="..\..\RoverMob.Distributor\bin\Release\RoverMob.Protocol.dll" target="lib\net45" />
+    <file src="..\..\RoverMob.Distributor\bin\Release\RoverMob.Distributor.dll" target="lib\net451" />
+    <file src="..\..\RoverMob.Distributor\bin\Release\RoverMob.Protocol.dll" target="lib\net451" />
   </files>
 </package>

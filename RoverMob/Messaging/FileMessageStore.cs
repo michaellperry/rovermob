@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Storage;
+using RoverMob.Implementation;
 
 namespace RoverMob.Messaging
 {
@@ -50,8 +50,11 @@ namespace RoverMob.Messaging
         {
             try
             {
-                var file = await CreateFileAsync(objectId);
-                var messages = await ReadMessagesAsync(file);
+                string fileName = String.Format("obj_{0}.json",
+                    objectId.ToCanonicalString());
+                var stream = await FileImplementation.OpenForRead(
+                    _folderName, fileName);
+                var messages = ReadMessages(stream);
                 var result = messages
                     .Select(m => Message.FromMemento(m))
                     .ToImmutableList();
@@ -65,19 +68,25 @@ namespace RoverMob.Messaging
 
         private async Task SaveInternalAsync(Message message)
         {
-            var file = await CreateFileAsync(message.ObjectId);
-            var messages = await ReadMessagesAsync(file);
+            string fileName = String.Format("obj_{0}.json",
+                message.ObjectId.ToCanonicalString());
+            var inputStream = await FileImplementation.OpenForRead(
+                _folderName, fileName);
+            var messages = ReadMessages(inputStream);
             if (!messages.Any(m => m.Hash == message.Hash.ToString()))
             {
                 messages.Add(message.GetMemento());
-                await WriteMessagesAsync(file, messages);
+                var outputStream = await FileImplementation.OpenForWrite(
+                    _folderName, fileName);
+                WriteMessages(outputStream, messages);
             }
         }
 
         private async Task SaveUserIdentifierInternalAsync(string role, Guid userIdentifier)
         {
-            var userFile = await CreateUserFileAsync(role);
-            var outputStream = await userFile.OpenStreamForWriteAsync();
+            string fileName = String.Format("user_{0}.txt", role);
+            var outputStream = await FileImplementation.OpenForWrite(
+                _folderName, fileName);
             using (var writer = new StreamWriter(outputStream))
             {
                 await writer.WriteAsync(userIdentifier.ToCanonicalString());
@@ -88,8 +97,9 @@ namespace RoverMob.Messaging
         {
             try
             {
-                var userFile = await CreateUserFileAsync(role);
-                var inputStream = await userFile.OpenStreamForReadAsync();
+                string fileName = String.Format("user_{0}.txt", role);
+                var inputStream = await FileImplementation.OpenForRead(
+                    _folderName, fileName);
                 using (var reader = new StreamReader(inputStream))
                 {
                     string line = await reader.ReadLineAsync();
@@ -105,21 +115,9 @@ namespace RoverMob.Messaging
             }
         }
 
-        private async Task<StorageFile> CreateFileAsync(Guid objectId)
-        {
-            var RoverMobFolder = await ApplicationData.Current.LocalFolder
-                .CreateFolderAsync(_folderName, CreationCollisionOption.OpenIfExists);
-            string fileName = String.Format("obj_{0}.json",
-                objectId.ToCanonicalString());
-            var objectFile = await RoverMobFolder
-                .CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
-            return objectFile;
-        }
-
-        private async Task<List<MessageMemento>> ReadMessagesAsync(StorageFile objectFile)
+        private List<MessageMemento> ReadMessages(Stream inputStream)
         {
             List<MessageMemento> messageList;
-            var inputStream = await objectFile.OpenStreamForReadAsync();
             using (JsonReader reader = new JsonTextReader(new StreamReader(inputStream)))
             {
                 messageList = _serializer.Deserialize<List<MessageMemento>>(reader);
@@ -130,23 +128,12 @@ namespace RoverMob.Messaging
             return messageList;
         }
 
-        private async Task WriteMessagesAsync(StorageFile objectFile, List<MessageMemento> messageList)
+        private void WriteMessages(Stream outputStream, List<MessageMemento> messageList)
         {
-            var outputStream = await objectFile.OpenStreamForWriteAsync();
             using (JsonWriter writer = new JsonTextWriter(new StreamWriter(outputStream)))
             {
                 _serializer.Serialize(writer, messageList);
             }
-        }
-
-        private async Task<StorageFile> CreateUserFileAsync(string role)
-        {
-            var RoverMobFolder = await ApplicationData.Current.LocalFolder
-                .CreateFolderAsync(_folderName, CreationCollisionOption.OpenIfExists);
-            string fileName = String.Format("user_{0}.txt", role);
-            var userFile = await RoverMobFolder
-                .CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
-            return userFile;
         }
     }
 }

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Storage;
 using System.IO;
+using RoverMob.Implementation;
 
 namespace RoverMob.Messaging
 {
@@ -19,8 +19,7 @@ namespace RoverMob.Messaging
 
         public async Task<string> LoadBookmarkAsync(string topic)
         {
-            var file = await CreateFileAsync(topic);
-            var stream = await file.OpenStreamForReadAsync();
+            var stream = await OpenForRead(topic);
             using (var reader = new StreamReader(stream))
             {
                 var bookmark = reader.ReadToEnd();
@@ -30,8 +29,7 @@ namespace RoverMob.Messaging
 
         public async Task SaveBookmarkAsync(string topic, string bookmark)
         {
-            var file = await CreateFileAsync(topic);
-            var stream = await file.OpenStreamForWriteAsync();
+            Stream stream = await OpenForWrite(topic);
             stream.SetLength(0);
             using (var writer = new StreamWriter(stream))
             {
@@ -39,14 +37,18 @@ namespace RoverMob.Messaging
             }
         }
 
-        private async Task<StorageFile> CreateFileAsync(string bookmark)
+        private async Task<Stream> OpenForRead(string topic)
         {
-            var RoverMobFolder = await ApplicationData.Current.LocalFolder
-                .CreateFolderAsync(_folderName, CreationCollisionOption.OpenIfExists);
-            string fileName = String.Format("b_{0}.txt", bookmark);
-            var bookmarkFile = await RoverMobFolder
-                .CreateFileAsync(fileName, CreationCollisionOption.OpenIfExists);
-            return bookmarkFile;
+            string fileName = String.Format("b_{0}.txt", topic);
+            return await FileImplementation.OpenForRead(
+                _folderName, fileName);
+        }
+
+        private async Task<Stream> OpenForWrite(string topic)
+        {
+            string fileName = String.Format("b_{0}.txt", topic);
+            return await FileImplementation.OpenForWrite(
+                _folderName, fileName);
         }
     }
 }
