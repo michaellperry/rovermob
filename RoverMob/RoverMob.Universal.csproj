@@ -46,6 +46,7 @@
     <Compile Include="Crypto\Sha256Digest.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\GuidExtensions.cs" />
+    <Compile Include="Messaging\NoOpBookmarkStore.cs" />
     <Compile Include="Messaging\HttpUserProxy.cs" />
     <Compile Include="Messaging\IUserProxy.cs" />
     <Compile Include="Messaging\Candidate.cs" />
