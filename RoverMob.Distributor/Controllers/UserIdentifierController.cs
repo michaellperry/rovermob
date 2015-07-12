@@ -25,7 +25,15 @@ namespace RoverMob.Distributor.Controllers
 
         public HttpResponseMessage Get()
         {
-            string userId = this.User.Identity.Name;
+            string userId = this.User != null
+                ? this.User.Identity != null
+                    ? this.User.Identity.Name
+                    : null
+                : null;
+
+            if (userId == null)
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+
             Guid identifier = _storage.GetUserIdentifier(_role, userId);
             var resp = new HttpResponseMessage(HttpStatusCode.OK);
             resp.Content = new StringContent(
