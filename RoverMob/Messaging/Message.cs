@@ -178,5 +178,20 @@ namespace RoverMob.Messaging
                 memento.Body,
                 MessageHash.Parse(memento.Hash));
         }
+
+        public override bool Equals(object obj)
+        {
+            var that = obj as Message;
+            if (that == this)
+                return true;
+            if (that == null)
+                return false;
+            return that.Hash.Equals(this.Hash);
+        }
+
+        public override int GetHashCode()
+        {
+            return Hash.GetHashCode();
+        }
     }
 }

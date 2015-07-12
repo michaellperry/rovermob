@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>RoverMob.Distributor</id>
-    <version>0.2.12</version>
+    <version>0.2.13</version>
     <title>Rover Mobile Distributor</title>
     <authors>Michael L Perry</authors>
     <owners>Michael L Perry</owners>

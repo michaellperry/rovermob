@@ -83,6 +83,7 @@ namespace RoverMob.Distributor.Controllers
                 .SelectMany(m => m.Predecessors)
                 .Where(p => p.Role == removedByRole)
                 .Select(p => p.Hash)
+                .Distinct()
                 .ToDictionary(h => h);
             return messages
                 .Where(m =>

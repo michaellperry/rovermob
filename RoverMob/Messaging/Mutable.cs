@@ -69,9 +69,11 @@ namespace RoverMob.Messaging
         {
             var predecessors = messages
                 .SelectMany(m => m.GetPredecessors("prior"))
+                .Distinct()
                 .ToLookup(h => h);
             var newCandidates = messages
                 .Where(m => !predecessors.Contains(m.Hash))
+                .Distinct()
                 .Select(m => new Candidate<T>(m.Hash, (T)m.Body.Value));
 
             lock (this)

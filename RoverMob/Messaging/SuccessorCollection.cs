@@ -102,11 +102,13 @@ namespace RoverMob.Messaging
             var removed = messages
                 .Where(m => m.Type == _removedByMessageType)
                 .SelectMany(m => m.GetPredecessors(_removedByRole))
+                .Distinct()
                 .ToLookup(h => h);
             var newItems = messages
                 .Where(m =>
                     m.Type == _createdByMessageType &&
                     !removed.Contains(m.Hash))
+                .Distinct()
                 .Select(m => new Candidate<T>(m.Hash, _createItem(m)));
 
             lock (this)
