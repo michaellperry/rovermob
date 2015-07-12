@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Web.Http;
 using RoverMob.Distributor.Notification;
 using System.Threading.Tasks;
+using System.Diagnostics.Tracing;
 
 namespace RoverMob.Distributor.Controllers
 {
@@ -36,7 +37,14 @@ namespace RoverMob.Distributor.Controllers
                 throw new UnauthorizedAccessException();
 
             _storage.WriteMessage(topic, message);
-            await _pushNotification.SendNotificationAsync(topic, message);
+            try
+            {
+                await _pushNotification.SendNotificationAsync(topic, message);
+            }
+            catch (Exception ex)
+            {
+                // If push notifications fail, don't worry about it.
+            }
         }
 
         public async Task<PageMemento> Get(string topic, string bookmark)
