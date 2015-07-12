@@ -10,7 +10,6 @@ using System.Web.Http;
 
 namespace RoverMob.Distributor.Controllers
 {
-    [Authorize]
     public abstract class UserIdentifierController : ApiController
     {
         private readonly AzureStorageProvider _storage;

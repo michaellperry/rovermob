@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace RoverMob.Distributor.Controllers
 {
-    [Authorize]
     public abstract class DistributorController : ApiController
     {
         private readonly AzureStorageProvider _storage;
