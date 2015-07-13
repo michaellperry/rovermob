@@ -81,9 +81,6 @@ namespace RoverMob
             {
                 _root.Value = root;
 
-                await _pushNotificationSubscription.Subscribe(
-                    root.GetObjectId().ToCanonicalString());
-
                 LoadNewObjects(ImmutableList<IMessageHandler>.Empty);
 
                 var queueMessages = await _messageQueue.LoadAsync();

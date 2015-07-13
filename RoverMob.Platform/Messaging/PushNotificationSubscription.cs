@@ -9,13 +9,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Networking.PushNotifications;
+using RoverMob.Tasks;
 
 namespace RoverMob.Messaging
 {
-    public class PushNotificationSubscription : IPushNotificationSubscription
+    public class PushNotificationSubscription : Process, IPushNotificationSubscription
     {
         private readonly string _notificationHubPath;
         private readonly string _connectionString;
+
+        private HashSet<string> _topics = new HashSet<string>();
 
         public event MessageReceivedHandler MessageReceived;
 
@@ -25,7 +28,19 @@ namespace RoverMob.Messaging
             _notificationHubPath = notificationHubPath;
         }
 
-        public async Task Subscribe(string topic)
+        public void Subscribe(List<string> topics)
+        {
+            var newTopics = topics
+                .Where(t => !_topics.Contains(t));
+
+            foreach (var topic in newTopics)
+            {
+                Perform(() => SubscribeInternalAsync(topic));
+                _topics.Add(topic);
+            }
+        }
+
+        private async Task SubscribeInternalAsync(string topic)
         {
 #if WINDOWS_PHONE_APP || WINDOWS_APP
             try

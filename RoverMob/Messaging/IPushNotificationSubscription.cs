@@ -9,6 +9,6 @@ namespace RoverMob.Messaging
     public interface IPushNotificationSubscription
     {
         event MessageReceivedHandler MessageReceived;
-        Task Subscribe(string topic);
+        void Subscribe(List<string> topics);
     }
 }

@@ -22,6 +22,7 @@ namespace RoverMob.Messaging
         private readonly IMessageQueue _messageQueue;
         private readonly IBookmarkStore _bookmarkStore;
         private readonly IAccessTokenProvider _accessTokenProvider;
+        private readonly IPushNotificationSubscription _pushNotificationSubscription;
 
         private ImmutableQueue<Message> _queue = ImmutableQueue<Message>.Empty;
 
@@ -29,20 +30,22 @@ namespace RoverMob.Messaging
         private Computed<List<string>> _topics;
         private ComputedSubscription _updateTopics;
         private Dictionary<string, string> _bookmarkByTopic = new Dictionary<string, string>();
-
+        
         public HttpMessagePump(
             Uri uri,
             IMessageQueue messageQueue,
             IBookmarkStore bookmarkStore,
-            IAccessTokenProvider accessTokenProvider = null)
+            IAccessTokenProvider accessTokenProvider = null,
+            IPushNotificationSubscription pushNotificationSubscription = null)
         {
             _uri = uri;
             _messageQueue = messageQueue;
             _bookmarkStore = bookmarkStore;
             _accessTokenProvider = accessTokenProvider;
+            _pushNotificationSubscription = pushNotificationSubscription;
 
             _topics = new Computed<List<string>>(() => _subscriptions.SelectMany(s => s()).ToList());
-            _updateTopics = _topics.Subscribe(_ => SendAndReceiveMessages());
+            _updateTopics = _topics.Subscribe(OnTopicsChanged);
             _topics.Touch();
         }
 
@@ -73,6 +76,13 @@ namespace RoverMob.Messaging
         public void SendAndReceiveMessages()
         {
             Perform(() => SendAndReceiveMessagesInternalAsync());
+        }
+
+        private void OnTopicsChanged(List<string> t)
+        {
+            if (_pushNotificationSubscription != null)
+                _pushNotificationSubscription.Subscribe(t);
+            SendAndReceiveMessages();
         }
 
         private async Task SendAndReceiveMessagesInternalAsync()

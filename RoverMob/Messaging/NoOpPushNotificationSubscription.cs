@@ -10,9 +10,8 @@ namespace RoverMob.Messaging
     {
         public event MessageReceivedHandler MessageReceived;
 
-        public Task Subscribe(string topic)
+        public void Subscribe(List<string> topics)
         {
-            return Task.FromResult(true);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace RoverMob.Distributor.Controllers
             _pushNotification = new AzurePushNotificationProvider(notificationConnectionString);
         }
 
-        public async Task Post(string topic, [FromBody]MessageMemento message)
+        public async Task<HttpResponseMessage> Post(string topic, [FromBody]MessageMemento message)
         {
             string userId = this.User != null
                 ? this.User.Identity != null
@@ -33,18 +33,21 @@ namespace RoverMob.Distributor.Controllers
                     : null
                 : null;
             bool authorized = await AuthorizeUserForPost(topic, userId);
-            if (!authorized)
-                throw new UnauthorizedAccessException();
+            if (authorized)
+            {
+                _storage.WriteMessage(topic, message);
+                try
+                {
+                    await _pushNotification.SendNotificationAsync(topic, message);
+                }
+                catch (Exception ex)
+                {
+                    // If push notifications fail, don't worry about it.
+                }
+            }
 
-            _storage.WriteMessage(topic, message);
-            try
-            {
-                await _pushNotification.SendNotificationAsync(topic, message);
-            }
-            catch (Exception ex)
-            {
-                // If push notifications fail, don't worry about it.
-            }
+            // If the user is not authorized, it's likely a duplicate message.
+            return Request.CreateResponse();
         }
 
         public async Task<PageMemento> Get(string topic, string bookmark)
@@ -55,10 +58,16 @@ namespace RoverMob.Distributor.Controllers
                     : null
                 : null;
             bool authorized = await AuthorizeUserForGet(topic, userId);
-            if (!authorized)
-                throw new UnauthorizedAccessException();
-
-            return _storage.ReadMessages(topic, bookmark);
+            if (authorized)
+                return _storage.ReadMessages(topic, bookmark);
+            else
+                // If the user is not authorized, he will learn
+                // about it via another topic.
+                return new PageMemento
+                {
+                    Bookmark = bookmark,
+                    Messages = new List<MessageMemento>()
+                };
         }
 
         protected abstract Task<bool> AuthorizeUserForPost(
