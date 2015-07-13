@@ -46,7 +46,6 @@ namespace RoverMob.Messaging
 
             _topics = new Computed<List<string>>(() => _subscriptions.SelectMany(s => s()).ToList());
             _updateTopics = _topics.Subscribe(OnTopicsChanged);
-            _topics.Touch();
         }
 
         public void Subscribe(Func<IEnumerable<string>> subscription)
