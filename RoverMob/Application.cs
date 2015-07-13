@@ -50,7 +50,9 @@ namespace RoverMob
             _pushNotificationSubscription.MessageReceived += NotificationReceived;
 
             _messageHandlers = new ComputedDictionary<Guid, IMessageHandler>(() =>
-                Decendants(_root.Value).ToDictionary(m => m.GetObjectId()));
+                Decendants(_root.Value)
+                    .Distinct()
+                    .ToDictionary(m => m.GetObjectId()));
         }
 
         public async void GetUserIdentifier(string role, Action<Guid> callback)

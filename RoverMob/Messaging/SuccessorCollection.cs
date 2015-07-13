@@ -63,7 +63,8 @@ namespace RoverMob.Messaging
                 lock (this)
                 {
                     var items = _items.Value;
-                    if (!_removed.Contains(messageHash))
+                    if (!_removed.Contains(messageHash) &&
+                        !items.Any(i => i.MessageHash == messageHash))
                     {
                         T item = _createItem(message);
                         items = items.Add(new Candidate<T>(
@@ -107,7 +108,8 @@ namespace RoverMob.Messaging
             var newItems = messages
                 .Where(m =>
                     m.Type == _createdByMessageType &&
-                    !removed.Contains(m.Hash))
+                    !removed.Contains(m.Hash) &&
+                    !_items.Value.Any(i => i.MessageHash == m.Hash))
                 .Distinct()
                 .Select(m => new Candidate<T>(m.Hash, _createItem(m)));
 
