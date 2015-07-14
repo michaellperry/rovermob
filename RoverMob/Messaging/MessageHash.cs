@@ -59,5 +59,15 @@ namespace RoverMob.Messaging
         {
             return new MessageHash(Convert.FromBase64String(str));
         }
+
+        public static bool operator ==(MessageHash a, MessageHash b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(MessageHash a, MessageHash b)
+        {
+            return !a.Equals(b);
+        }
     }
 }
