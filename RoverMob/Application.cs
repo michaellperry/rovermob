@@ -19,7 +19,7 @@ namespace RoverMob
         private readonly IUserProxy _userProxy;
 
         private Observable<TRoot> _root = new Observable<TRoot>();
-        private ComputedDictionary<Guid, IMessageHandler> _messageHandlers;
+        private ComputedDictionary<Guid, ImmutableList<IMessageHandler>> _messageHandlers;
 
         private Observable<Exception> _exception = new Observable<Exception>();
         
@@ -49,10 +49,11 @@ namespace RoverMob
             _messagePump.MessageReceived += MessageReceived;
             _pushNotificationSubscription.MessageReceived += NotificationReceived;
 
-            _messageHandlers = new ComputedDictionary<Guid, IMessageHandler>(() =>
+            _messageHandlers = new ComputedDictionary<Guid, ImmutableList<IMessageHandler>>(() =>
                 Decendants(_root.Value)
                     .Distinct()
-                    .ToDictionary(m => m.GetObjectId()));
+                    .GroupBy(m => m.GetObjectId())
+                    .ToDictionary(g => g.Key, g => g.ToImmutableList()));
         }
 
         public async void GetUserIdentifier(string role, Action<Guid> callback)
@@ -138,11 +139,15 @@ namespace RoverMob
 
         private void HandleMessage(Message message)
         {
-            IMessageHandler messageHandler;
-            if (_messageHandlers.TryGetValue(message.ObjectId, out messageHandler))
+            ImmutableList<IMessageHandler> messageHandlerList;
+            if (_messageHandlers.TryGetValue(message.ObjectId, out messageHandlerList))
             {
-                var handlers = _messageHandlers.Values.ToImmutableList();
-                messageHandler.HandleMessage(message);
+                var handlers = _messageHandlers
+                    .Values
+                    .SelectMany(l => l)
+                    .ToImmutableList();
+                foreach (var messageHander in messageHandlerList)
+                    messageHander.HandleMessage(message);
                 LoadNewObjects(handlers);
             }
         }
@@ -151,7 +156,11 @@ namespace RoverMob
         {
             try
             {
-                var newHandlers = _messageHandlers.Values.Except(loadedHandlers).ToImmutableList();
+                var newHandlers = _messageHandlers
+                    .Values
+                    .SelectMany(l => l)
+                    .Except(loadedHandlers)
+                    .ToImmutableList();
                 while (newHandlers.Any())
                 {
                     foreach (var handler in newHandlers)
@@ -161,7 +170,11 @@ namespace RoverMob
                             handler.HandleAllMessages(messages);
                     }
                     loadedHandlers = loadedHandlers.AddRange(newHandlers);
-                    newHandlers = _messageHandlers.Values.Except(loadedHandlers).ToImmutableList();
+                    newHandlers = _messageHandlers
+                        .Values
+                        .SelectMany(l => l)
+                        .Except(loadedHandlers)
+                        .ToImmutableList();
                 }
             }
             catch (Exception ex)
