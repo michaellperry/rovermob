@@ -65,13 +65,20 @@ namespace RoverMob.Messaging
 #if WINDOWS_PHONE_APP || WINDOWS_APP
         void channel_PushNotificationReceived(PushNotificationChannel sender, PushNotificationReceivedEventArgs args)
         {
-            if (args.NotificationType == PushNotificationType.Raw)
+            try
             {
-                var message = JsonConvert.DeserializeObject<MessageMemento>(
-                    args.RawNotification.Content);
+                if (args.NotificationType == PushNotificationType.Raw)
+                {
+                    var message = JsonConvert.DeserializeObject<MessageMemento>(
+                        args.RawNotification.Content);
 
-                if (MessageReceived != null)
-                    MessageReceived(Message.FromMemento(message));
+                    if (MessageReceived != null)
+                        MessageReceived(Message.FromMemento(message));
+                }
+            }
+            catch (Exception x)
+            {
+                // Ignore bad notification messages
             }
         }
 #endif
