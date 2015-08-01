@@ -34,6 +34,23 @@ namespace RoverMob.Distributor.Controllers
             if (userId == null)
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
 
+            return GetUserIdentifierResponse(userId);
+        }
+
+        public HttpResponseMessage Get(string userId)
+        {
+            if (string.IsNullOrEmpty(userId) ||
+                User.Identity == null ||
+                !AuthorizeUserForGet(userId, User.Identity.Name))
+            {
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }
+
+            return GetUserIdentifierResponse(userId);
+        }
+
+        private HttpResponseMessage GetUserIdentifierResponse(string userId)
+        {
             Guid identifier = _storage.GetUserIdentifier(_role, userId);
             var resp = new HttpResponseMessage(HttpStatusCode.OK);
             resp.Content = new StringContent(
@@ -42,5 +59,9 @@ namespace RoverMob.Distributor.Controllers
                 "text/plain");
             return resp;
         }
+
+        protected abstract bool AuthorizeUserForGet(
+            string requestedUserId,
+            string userId);
     }
 }
