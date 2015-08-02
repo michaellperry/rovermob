@@ -9,6 +9,7 @@ using System.Web.Http;
 using RoverMob.Distributor.Notification;
 using System.Threading.Tasks;
 using System.Diagnostics.Tracing;
+using Microsoft.ServiceBus.Messaging;
 
 namespace RoverMob.Distributor.Controllers
 {
@@ -16,13 +17,19 @@ namespace RoverMob.Distributor.Controllers
     {
         private readonly AzureStorageProvider _storage;
         private readonly AzurePushNotificationProvider _pushNotification;
+        private readonly QueueClient _queueClient;
 
         protected DistributorController(
             string storageConnectionString,
-            string notificationConnectionString)
+            string notificationConnectionString,
+            string serviceBusConnectionString,
+            string serviceBusPath)
         {
             _storage = new AzureStorageProvider(storageConnectionString);
             _pushNotification = new AzurePushNotificationProvider(notificationConnectionString);
+            _queueClient = QueueClient.CreateFromConnectionString(
+                serviceBusConnectionString,
+                serviceBusPath);
         }
 
         public async Task<HttpResponseMessage> Post(string topic, [FromBody]MessageMemento message)
@@ -36,6 +43,7 @@ namespace RoverMob.Distributor.Controllers
             if (authorized)
             {
                 _storage.WriteMessage(topic, message);
+                await _queueClient.SendAsync(new BrokeredMessage(message));
                 try
                 {
                     await _pushNotification.SendNotificationAsync(topic, message);
