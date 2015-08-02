@@ -7,7 +7,7 @@ namespace RoverMob.Implementation
 {
     public static class HttpImplementation
     {
-        public static Task<HttpProxy> CreateProxyAsync(string accessToken)
+        public static Task<HttpProxy> CreateProxyAsync(string accessToken, string apiKey)
         {
             throw new NotImplementedException();
         }

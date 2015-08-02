@@ -10,7 +10,7 @@ namespace RoverMob.Implementation
 {
     public static class HttpImplementation
     {
-        public static async Task<HttpProxy> CreateProxyAsync(string accessToken)
+        public static async Task<HttpProxy> CreateProxyAsync(string accessToken, string apiKey)
         {
             HttpClient client = new HttpClient();
             if (accessToken != null)
@@ -19,6 +19,8 @@ namespace RoverMob.Implementation
                     new AuthenticationHeaderValue(
                         "Bearer", accessToken);
             }
+            if (!string.IsNullOrWhiteSpace(apiKey))
+                client.DefaultRequestHeaders.Add("ApiKey", apiKey);
             return new HttpProxy(client);
         }
     }

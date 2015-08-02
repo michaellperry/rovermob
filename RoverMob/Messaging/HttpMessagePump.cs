@@ -48,6 +48,8 @@ namespace RoverMob.Messaging
             _updateTopics = _topics.Subscribe(OnTopicsChanged);
         }
 
+        public string ApiKey { get; set; }
+
         public void Subscribe(Func<IEnumerable<string>> subscription)
         {
             _subscriptions.Add(subscription);
@@ -94,7 +96,7 @@ namespace RoverMob.Messaging
                 else
                     accessToken = null;
                 using (var client = await HttpImplementation.CreateProxyAsync(
-                    accessToken))
+                    accessToken, ApiKey))
                 {
                     await SendMessagesInternalAsync(client);
 

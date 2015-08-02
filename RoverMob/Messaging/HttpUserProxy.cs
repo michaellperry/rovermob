@@ -22,7 +22,7 @@ namespace RoverMob.Messaging
             string accessToken = await _accessTokenProvider
                 .GetAccessTokenAsync();
             using (var client = await HttpImplementation.CreateProxyAsync(
-                accessToken))
+                accessToken, null))
             {
                 string result = await client.GetJsonAsync(_uri);
                 return Guid.Parse(result);
