@@ -1,4 +1,5 @@
 ﻿using RoverMob.Distributor.Dispatchers;
+using RoverMob.Distributor.Filters;
 using RoverMob.Distributor.Storage;
 using RoverMob.Protocol;
 using System;
@@ -12,9 +13,15 @@ namespace RoverMob.Distributor.Controllers
 {
     public abstract class DistributorController : ApiController
     {
+        struct Handler
+        {
+            public IFilter Filter;
+            public IDispatcher Dispatcher;
+        }
+
         private readonly AzureStorageProvider _storage;
 
-        private List<IDispatcher> _dispatchers = new List<IDispatcher>();
+        private List<Handler> _handlers = new List<Handler>();
 
         protected DistributorController(
             string storageConnectionString)
@@ -36,7 +43,12 @@ namespace RoverMob.Distributor.Controllers
 
         public void AddDispatcher(IDispatcher dispatcher)
         {
-            _dispatchers.Add(dispatcher);
+            AddDispatcher(AllMessages.Instance, dispatcher);
+        }
+
+        public void AddDispatcher(IFilter filter, IDispatcher dispatcher)
+        {
+            _handlers.Add(new Handler { Filter = filter, Dispatcher = dispatcher });
         }
 
         public async Task<HttpResponseMessage> Post(string topic, [FromBody]MessageMemento message)
@@ -50,8 +62,9 @@ namespace RoverMob.Distributor.Controllers
             if (authorized)
             {
                 _storage.WriteMessage(topic, message);
-                await Task.WhenAll(_dispatchers.Select(d =>
-                    d.DispatchAsync(topic, message)));
+                await Task.WhenAll(_handlers
+                    .Where(h => h.Filter.Accepts(topic, message))
+                    .Select(h => h.Dispatcher.DispatchAsync(topic, message)));
             }
 
             // If the user is not authorized, it's likely a duplicate message.
