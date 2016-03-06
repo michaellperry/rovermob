@@ -1,19 +1,20 @@
 ﻿using RoverMob.Protocol;
+using System.Linq;
 
 namespace RoverMob.Distributor.Filters
 {
     public class MessagesOfType : IFilter
     {
-        private readonly string _messageType;
+        private readonly string[] _messageTypes;
 
-        public MessagesOfType(string messageType)
+        public MessagesOfType(params string[] messageTypes)
         {
-            _messageType = messageType;
+            _messageTypes = messageTypes;
         }
 
         public bool Accepts(string topic, MessageMemento message)
         {
-            return message.MessageType == _messageType;
+            return _messageTypes.Contains(message.MessageType);
         }
     }
 }
