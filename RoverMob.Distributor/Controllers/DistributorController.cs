@@ -1,35 +1,42 @@
-﻿using RoverMob.Distributor.Storage;
+﻿using RoverMob.Distributor.Dispatchers;
+using RoverMob.Distributor.Storage;
 using RoverMob.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Web.Http;
-using RoverMob.Distributor.Notification;
 using System.Threading.Tasks;
-using System.Diagnostics.Tracing;
-using Microsoft.ServiceBus.Messaging;
+using System.Web.Http;
 
 namespace RoverMob.Distributor.Controllers
 {
     public abstract class DistributorController : ApiController
     {
         private readonly AzureStorageProvider _storage;
-        private readonly AzurePushNotificationProvider _pushNotification;
-        private readonly QueueClient _queueClient;
 
+        private List<IDispatcher> _dispatchers = new List<IDispatcher>();
+
+        protected DistributorController(
+            string storageConnectionString)
+        {
+            _storage = new AzureStorageProvider(storageConnectionString);
+        }
+
+        [Obsolete("Use the constructor with one parameter, and add dispatchers individually")]
         protected DistributorController(
             string storageConnectionString,
             string notificationConnectionString,
             string serviceBusConnectionString,
-            string serviceBusPath)
+            string serviceBusPath) :
+            this(storageConnectionString)
         {
-            _storage = new AzureStorageProvider(storageConnectionString);
-            _pushNotification = new AzurePushNotificationProvider(notificationConnectionString);
-            _queueClient = QueueClient.CreateFromConnectionString(
-                serviceBusConnectionString,
-                serviceBusPath);
+            AddDispatcher(new AzureNotificationHubDispatcher(notificationConnectionString));
+            AddDispatcher(new AzureServiceBusQueueDispatcher(serviceBusConnectionString, serviceBusPath));
+        }
+
+        public void AddDispatcher(IDispatcher dispatcher)
+        {
+            _dispatchers.Add(dispatcher);
         }
 
         public async Task<HttpResponseMessage> Post(string topic, [FromBody]MessageMemento message)
@@ -43,15 +50,8 @@ namespace RoverMob.Distributor.Controllers
             if (authorized)
             {
                 _storage.WriteMessage(topic, message);
-                await _queueClient.SendAsync(new BrokeredMessage(message));
-                try
-                {
-                    await _pushNotification.SendNotificationAsync(topic, message);
-                }
-                catch (Exception ex)
-                {
-                    // If push notifications fail, don't worry about it.
-                }
+                await Task.WhenAll(_dispatchers.Select(d =>
+                    d.DispatchAsync(topic, message)));
             }
 
             // If the user is not authorized, it's likely a duplicate message.

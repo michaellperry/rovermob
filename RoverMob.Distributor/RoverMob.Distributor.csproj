@@ -83,6 +83,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\DistributorController.cs" />
+    <Compile Include="Dispatchers\AzureNotificationHubDispatcher.cs" />
+    <Compile Include="Dispatchers\AzureServiceBusQueueDispatcher.cs" />
+    <Compile Include="Dispatchers\IDispatcher.cs" />
     <Compile Include="Controllers\UserIdentifierController.cs" />
     <Compile Include="Extensions\GuidExtensions.cs" />
     <Compile Include="Notification\AzurePushNotificationProvider.cs" />
