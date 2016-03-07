@@ -19,13 +19,22 @@ namespace RoverMob.Messaging
 
         public async Task<Guid> GetUserIdentifier(string role)
         {
-            string accessToken = await _accessTokenProvider
-                .GetAccessTokenAsync();
-            using (var client = await HttpImplementation.CreateProxyAsync(
-                accessToken, null))
+            try
             {
-                string result = await client.GetJsonAsync(_uri);
-                return Guid.Parse(result);
+                string accessToken = await _accessTokenProvider
+                    .GetAccessTokenAsync();
+                using (var client = await HttpImplementation.CreateProxyAsync(
+                    accessToken, null))
+                {
+                    string result = await client.GetJsonAsync(_uri);
+                    return Guid.Parse(result);
+                }
+            }
+            catch (Exception x)
+            {
+                if (x.Message.StartsWith("Unauthorized (401)."))
+                    _accessTokenProvider.RefreshAccessToken();
+                throw;
             }
         }
     }

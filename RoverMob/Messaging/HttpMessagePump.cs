@@ -106,7 +106,7 @@ namespace RoverMob.Messaging
             }
             catch (Exception x)
             {
-                if (_accessTokenProvider != null)
+                if (x.Message.StartsWith("Unauthorized (401).") && _accessTokenProvider != null)
                     _accessTokenProvider.RefreshAccessToken();
                 throw;
             }
