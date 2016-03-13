@@ -40,7 +40,9 @@
     <Compile Include="FileImplementation.cs" />
     <Compile Include="HttpImplementation.cs" />
     <Compile Include="HttpProxy.cs" />
+    <Compile Include="PasswordVaultImplementation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebAuthenticationBrokerImplementation.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
