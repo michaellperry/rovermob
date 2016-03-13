@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Assisticant.Fields;
 using Assisticant.Collections;
 using RoverMob.Implementation;
+using System.Runtime.InteropServices;
 
 namespace RoverMob.Messaging
 {
@@ -88,27 +89,35 @@ namespace RoverMob.Messaging
 
         private async Task SendAndReceiveMessagesInternalAsync()
         {
-            try
+            int attempts = 2;
+            while (true)
             {
-                string accessToken;
-                if (_accessTokenProvider != null)
-                    accessToken = await _accessTokenProvider.GetAccessTokenAsync();
-                else
-                    accessToken = null;
-                using (var client = await HttpImplementation.CreateProxyAsync(
-                    accessToken, ApiKey))
+                attempts--;
+                try
                 {
-                    await SendMessagesInternalAsync(client);
+                    string accessToken;
+                    if (_accessTokenProvider != null)
+                        accessToken = await _accessTokenProvider.GetAccessTokenAsync();
+                    else
+                        accessToken = null;
+                    using (var client = await HttpImplementation.CreateProxyAsync(
+                        accessToken, ApiKey))
+                    {
+                        await SendMessagesInternalAsync(client);
 
-                    foreach (var topic in _topics.Value)
-                        await ReceiveMessagesInternalAsync(client, topic);
+                        foreach (var topic in _topics.Value)
+                            await ReceiveMessagesInternalAsync(client, topic);
+                    }
+                    break;
                 }
-            }
-            catch (Exception x)
-            {
-                if (x.Message.StartsWith("Unauthorized (401).") && _accessTokenProvider != null)
+                catch (COMException x) when (
+                    x.HResult == unchecked((int)0x80190191) &&
+                    _accessTokenProvider != null &&
+                    attempts > 0)
+                {
                     _accessTokenProvider.RefreshAccessToken();
-                throw;
+                }
+                break;
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using RoverMob.Implementation;
 using System;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace RoverMob.Messaging
 {
@@ -19,22 +20,27 @@ namespace RoverMob.Messaging
 
         public async Task<Guid> GetUserIdentifier(string role)
         {
-            try
+            int attempts = 2;
+            while (true)
             {
-                string accessToken = await _accessTokenProvider
-                    .GetAccessTokenAsync();
-                using (var client = await HttpImplementation.CreateProxyAsync(
-                    accessToken, null))
+                attempts--;
+                try
                 {
-                    string result = await client.GetJsonAsync(_uri);
-                    return Guid.Parse(result);
+                    string accessToken = await _accessTokenProvider
+                        .GetAccessTokenAsync();
+                    using (var client = await HttpImplementation.CreateProxyAsync(
+                        accessToken, null))
+                    {
+                        string result = await client.GetJsonAsync(_uri);
+                        return Guid.Parse(result);
+                    }
                 }
-            }
-            catch (Exception x)
-            {
-                if (x.Message.StartsWith("Unauthorized (401)."))
+                catch (COMException x) when (
+                    x.HResult == unchecked((int)0x80190191) &&
+                    attempts > 0)
+                {
                     _accessTokenProvider.RefreshAccessToken();
-                throw;
+                }
             }
         }
     }
