@@ -45,7 +45,10 @@ namespace RoverMob.Messaging
             _accessTokenProvider = accessTokenProvider;
             _pushNotificationSubscription = pushNotificationSubscription;
 
-            _topics = new Computed<List<string>>(() => _subscriptions.SelectMany(s => s()).ToList());
+            _topics = new Computed<List<string>>(() => _subscriptions
+                .SelectMany(s => s() ?? ImmutableList<string>.Empty)
+                .Where(topic => topic != null)
+                .ToList());
             _updateTopics = _topics.Subscribe(OnTopicsChanged);
         }
 
